@@ -1,0 +1,16 @@
+# Build intermediates
+.DS_Store
+*.swp
+xcuserdata/
+DerivedData/
+# Do not commit local history or secrets
+**/daily_history.json
+.env
+*.pem
+# Prefer release zip over loose nested builds during dev
+# (committed release assets live under dist/ for convenience)
+Resources/AppIcon.iconset/
+Resources/AppIcon-1024.png
+
+# Local build output
+dist/

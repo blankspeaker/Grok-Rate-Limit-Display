@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="24dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/settings"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <!-- Balance the back button so title stays centered -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Account -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:text="@string/settings_section_account" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowAccount"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <TextView
+                        android:id="@+id/txtAccountAction"
+                        style="@style/Widget.GRLD.SettingsRowTitle"
+                        android:text="@string/sign_in" />
+
+                    <ImageView
+                        android:id="@+id/chevronAccount"
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Status chip -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_section_status" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowShowUsed"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/show_used_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/show_used_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkShowUsed"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                <LinearLayout
+                    android:id="@+id/rowShowRemaining"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/show_remaining_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/show_remaining_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkShowRemaining"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Display surfaces -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_section_display" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowStatusPill"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/toggle_status_pill_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/toggle_status_pill_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkStatusPill"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                <LinearLayout
+                    android:id="@+id/rowTrayNotif"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/toggle_tray_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/toggle_tray_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkTrayNotif"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                <LinearLayout
+                    android:id="@+id/rowAddWidget"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/add_homescreen_widget_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/add_homescreen_widget_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Alerts -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_section_alerts" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowAlertsEnable"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/alerts_enable_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/alerts_enable_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkAlertsEnable"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/alertsOptions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/rowAlertSound"
+                        style="@style/Widget.GRLD.SettingsRow">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Widget.GRLD.SettingsRowTitle"
+                                android:layout_width="match_parent"
+                                android:text="@string/alerts_sound_title" />
+
+                            <TextView
+                                android:id="@+id/txtAlertSound"
+                                style="@style/Widget.GRLD.SettingsRowSubtitle"
+                                android:text="@string/alerts_sound_default" />
+                        </LinearLayout>
+
+                        <ImageView
+                            style="@style/Widget.GRLD.SettingsChevron"
+                            android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/rowAlertEvery"
+                        style="@style/Widget.GRLD.SettingsRow">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Widget.GRLD.SettingsRowTitle"
+                                android:layout_width="match_parent"
+                                android:text="@string/alerts_every_title" />
+
+                            <TextView
+                                android:id="@+id/txtAlertEvery"
+                                style="@style/Widget.GRLD.SettingsRowSubtitle"
+                                android:text="@string/alerts_every_sub" />
+                        </LinearLayout>
+
+                        <ImageView
+                            style="@style/Widget.GRLD.SettingsChevron"
+                            android:contentDescription="@null" />
+                    </LinearLayout>
+
+                    <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/rowAlertDaily"
+                        style="@style/Widget.GRLD.SettingsRow">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/Widget.GRLD.SettingsRowTitle"
+                                android:layout_width="match_parent"
+                                android:text="@string/alerts_daily_title" />
+
+                            <TextView
+                                style="@style/Widget.GRLD.SettingsRowSubtitle"
+                                android:text="@string/alerts_daily_sub" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/checkAlertDaily"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_check"
+                            android:contentDescription="@null"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- History (cross-platform import/export) -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_section_history" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowExportHistory"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/export_history_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/export_history_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+
+                <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                <LinearLayout
+                    android:id="@+id/rowImportHistory"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/import_history_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/import_history_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- System -->
+            <TextView
+                style="@style/Widget.GRLD.SettingsSection"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_section_system" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_settings_group"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rowLiveUpdates"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/enable_live_updates_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/enable_live_updates_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/dividerCheckUpdate"
+                    style="@style/Widget.GRLD.SettingsDivider"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/rowAutoUpdate"
+                    style="@style/Widget.GRLD.SettingsRow"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/auto_update_title" />
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/auto_update_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/checkAutoUpdate"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_check"
+                        android:contentDescription="@null"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/dividerAutoUpdate"
+                    style="@style/Widget.GRLD.SettingsDivider"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/rowCheckUpdate"
+                    style="@style/Widget.GRLD.SettingsRow"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Widget.GRLD.SettingsRowTitle"
+                            android:layout_width="match_parent"
+                            android:text="@string/check_update_title" />
+
+                        <TextView
+                            android:id="@+id/txtUpdateStatus"
+                            style="@style/Widget.GRLD.SettingsRowSubtitle"
+                            android:text="@string/check_update_sub" />
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+
+                <View style="@style/Widget.GRLD.SettingsDivider" />
+
+                <LinearLayout
+                    android:id="@+id/rowGitHub"
+                    style="@style/Widget.GRLD.SettingsRow">
+
+                    <TextView
+                        style="@style/Widget.GRLD.SettingsRowTitle"
+                        android:text="@string/github" />
+
+                    <ImageView
+                        style="@style/Widget.GRLD.SettingsChevron"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:gravity="center"
+                android:text="@string/footer_credit"
+                android:textColor="#555555"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

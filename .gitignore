@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+**/.DS_Store
+
+# macOS builds (publish only via Binaries/)
+macos/dist/
+**/*.xcuserstate
+**/xcuserdata/
+
+# Android SDK / local machine
+android/local.properties
+android/keystore.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/**/build/
+android/.idea/
+android/**/*.iml
+android/**/hs_err_pid*.log
+*.apk.idsig
+
+# Secrets / env (never commit)
+.env
+.env.*
+*.pem
+*.p12
+*.jks
+*.keystore
+**/signing.properties
+google-services.json
+GoogleService-Info.plist
+**/credentials*
+**/secrets*
+
+# Runtime data (if ever dropped in-tree)
+**/daily_history.json
+**/session*.json
+**/cookies*.txt
+
+# Crash logs
+**/hs_err_pid*.log
