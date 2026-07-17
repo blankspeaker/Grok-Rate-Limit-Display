@@ -10,6 +10,28 @@ By [@blankspeaker](https://x.com/blankspeaker).
 
 > Unofficial third-party apps. **Not** affiliated with, supported, or endorsed by SpaceXAI / Grok. **Use at your own risk.**
 
+## Screenshots
+
+### macOS
+
+Menu bar popup with weekly usage, category breakdown, daily chart, and **Before Reset** legend — plus settings (categories in menu bar, bar graph, auto-update, import/export history).
+
+<p align="center">
+  <img src="docs/screenshots/macos-main.png" alt="macOS — Weekly SuperGrok Limit menu" width="360" />
+  &nbsp;
+  <img src="docs/screenshots/macos-settings.png" alt="macOS — Settings and Support menu" width="220" />
+</p>
+
+### Android
+
+In-app dashboard with categories and daily chart, plus **home-screen widget** and **Live Update / status notification** (works on lock screen and Always On Display).
+
+<p align="center">
+  <img src="docs/screenshots/android-main.png" alt="Android — main app screen" width="280" />
+  &nbsp;
+  <img src="docs/screenshots/android-widget-notification.jpg" alt="Android — widget and notification on home screen" width="280" />
+</p>
+
 ## Who this works for
 
 A **SuperGrok** or **SuperGrok Heavy** plan is required to access usage limits.
@@ -79,6 +101,7 @@ Grok-Rate-Limit-Display/
 ├── README.md
 ├── LICENSE
 ├── Binaries/          prebuilt downloads + version manifests
+├── docs/screenshots/  README images
 ├── macos/
 └── android/
 ```
