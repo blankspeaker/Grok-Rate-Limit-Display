@@ -11,6 +11,17 @@ class UsageRepository private constructor(context: Context) {
     private val prefs = app.getSharedPreferences("grld_usage", Context.MODE_PRIVATE)
     private val client = GrokClient(app)
 
+    init {
+        // One-time: restore tray bar card for installs that lost it when Live Update
+        // pill took over (ProgressStyle had no lock-screen/shade bar).
+        if (!prefs.getBoolean(KEY_TRAY_BAR_RESTORE, false)) {
+            prefs.edit()
+                .putBoolean(KEY_TRAY, true)
+                .putBoolean(KEY_TRAY_BAR_RESTORE, true)
+                .apply()
+        }
+    }
+
     private val _state = MutableStateFlow(readCached())
     val state: StateFlow<UsageUiState> = _state.asStateFlow()
 
@@ -122,6 +133,8 @@ class UsageRepository private constructor(context: Context) {
             // Persist period so widget / tray can show "Resets …" offline
             .putString("period_start", u.currentPeriod?.start)
             .putString("period_end", u.currentPeriod?.end)
+            // Persist category segments so tray/widget bar stays multi-color after restart
+            .putString("product_usage", encodeProducts(u.productUsage))
             .apply()
     }
 
@@ -142,7 +155,7 @@ class UsageRepository private constructor(context: Context) {
                 weeklyUsageAvailable = true,
                 tierName = prefs.getString("tier", null),
                 currentPeriod = period,
-                productUsage = emptyList(),
+                productUsage = decodeProducts(prefs.getString("product_usage", null)),
                 fetchedAt = prefs.getString("fetched", "") ?: "",
                 cached = true
             ),
@@ -150,9 +163,31 @@ class UsageRepository private constructor(context: Context) {
         )
     }
 
+    /** Compact: "id|name|pct;id|name|pct" — names may not contain '|' or ';'. */
+    private fun encodeProducts(list: List<ProductUsage>): String {
+        if (list.isEmpty()) return ""
+        return list.joinToString(";") { p ->
+            val name = p.name.replace('|', '/').replace(';', ',')
+            "${p.product}|$name|${p.usagePercent}"
+        }
+    }
+
+    private fun decodeProducts(raw: String?): List<ProductUsage> {
+        if (raw.isNullOrBlank()) return emptyList()
+        return raw.split(';').mapNotNull { part ->
+            val bits = part.split('|')
+            if (bits.size < 3) return@mapNotNull null
+            val id = bits[0].toIntOrNull() ?: return@mapNotNull null
+            val pct = bits[2].toIntOrNull() ?: return@mapNotNull null
+            ProductUsage(product = id, name = bits[1], usagePercent = pct)
+        }
+    }
+
     companion object {
         private const val KEY_STATUS_PILL = "show_status_pill"
         private const val KEY_TRAY = "show_tray_notification"
+        /** Migration flag: re-enable tray card after Live Update bar regression. */
+        private const val KEY_TRAY_BAR_RESTORE = "tray_bar_restore_v1"
         private const val KEY_ALERTS = "alerts_enabled"
         private const val KEY_ALERT_EVERY = "alert_every_percent"
         private const val KEY_ALERT_DAILY = "alert_over_daily_goal"

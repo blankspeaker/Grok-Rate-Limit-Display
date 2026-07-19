@@ -50,9 +50,9 @@
     <string name="settings_section_display">Display</string>
     <string name="settings_section_system">System</string>
     <string name="toggle_status_pill_title">Status bar pill</string>
-    <string name="toggle_status_pill_sub">Live Update chip next to the clock (Android 16+)</string>
+    <string name="toggle_status_pill_sub">Live Update chip next to the clock (Android 16+; off while tray widget is on)</string>
     <string name="toggle_tray_title">Notification tray widget</string>
-    <string name="toggle_tray_sub">Expanded shade card with multi-color bar + categories</string>
+    <string name="toggle_tray_sub">Shade + lock screen card with thin multi-color bar + categories</string>
     <string name="add_homescreen_widget_title">Add home screen widget</string>
     <string name="add_homescreen_widget_sub">Uses the system widget picker (looks like the tray card)</string>
     <string name="widget_label">Grok usage</string>

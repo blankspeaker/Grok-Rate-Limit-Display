@@ -355,16 +355,22 @@ class UsageMonitorService : Service() {
         if (!wantPill && !wantTray) {
             return buildMinimalNotification(state)
         }
-        // Status chip (Live Update pill with %) when enabled — can also carry tray RemoteViews.
-        // Previously tray-only path skipped the pill entirely, leaving a tiny non-pill icon.
-        if (wantPill && Build.VERSION.SDK_INT >= 36) {
-            buildPromotedNotification(state, includeTray = wantTray)?.let { return it }
-        }
-        // Tray without pill, or pill unavailable on this OS
+        // Thin multi-color segmented bar on shade + lock screen (custom RemoteViews).
+        //
+        // Android 16+ Live Update forbids custom content views (demotes the status
+        // pill). ProgressStyle was tried as a substitute but often does not render
+        // on lock screen / shade — so the tray card always uses RemoteViews.
+        //
+        // If tray is on → always the bar card.
+        // If only the status pill is on → Live Update chip (no custom bar);
+        // fall back to the bar card when promote is unavailable.
         if (wantTray) {
             return buildLegacyNotification(state)
         }
-        return buildMinimalNotification(state)
+        if (wantPill && Build.VERSION.SDK_INT >= 36) {
+            buildPromotedNotification(state, includeTray = false)?.let { return it }
+        }
+        return buildLegacyNotification(state)
     }
 
     /**
@@ -760,11 +766,17 @@ class UsageMonitorService : Service() {
         private const val POLL_IDLE_MS = 30 * 60 * 1000L
 
         fun start(context: Context) {
-            context.startForegroundService(Intent(context, UsageMonitorService::class.java))
+            try {
+                context.startForegroundService(Intent(context, UsageMonitorService::class.java))
+            } catch (_: Exception) {
+                // Screen-off / background start restrictions (Android 12+) — retry from UI later.
+            }
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, UsageMonitorService::class.java))
+            try {
+                context.stopService(Intent(context, UsageMonitorService::class.java))
+            } catch (_: Exception) { }
         }
 
         /** Rebuild notification after display toggles change. */
