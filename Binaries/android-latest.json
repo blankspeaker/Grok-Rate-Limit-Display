@@ -1,8 +1,8 @@
 {
-  "version": "1.0.1",
-  "versionCode": 2,
-  "tag": "v1.0.1",
+  "version": "1.0.2",
+  "versionCode": 3,
+  "tag": "v1.0.2",
   "apk": "GRLD-android.apk",
   "apk_url": "https://github.com/blankspeaker/Grok-Rate-Limit-Display/raw/main/Binaries/GRLD-android.apk",
-  "notes": "Fixed notification/lockscreen widget"
+  "notes": "Always On/lock screen chip toggle; ProgressStyle bar when chip is on"
 }

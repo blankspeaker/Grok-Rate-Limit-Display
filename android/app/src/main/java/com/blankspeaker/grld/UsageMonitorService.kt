@@ -355,21 +355,22 @@ class UsageMonitorService : Service() {
         if (!wantPill && !wantTray) {
             return buildMinimalNotification(state)
         }
-        // Thin multi-color segmented bar on shade + lock screen (custom RemoteViews).
+        // Two mutually exclusive rich styles (platform limit on Android 16+):
         //
-        // Android 16+ Live Update forbids custom content views (demotes the status
-        // pill). ProgressStyle was tried as a substitute but often does not render
-        // on lock screen / shade — so the tray card always uses RemoteViews.
+        // 1) Status pill ON → Live Update / promoted ongoing.
+        //    Appears on Always On Display + lock screen + clock chip.
+        //    Must NOT use custom RemoteViews (demotes promotion). Shade uses
+        //    ProgressStyle segments when tray is also on.
         //
-        // If tray is on → always the bar card.
-        // If only the status pill is on → Live Update chip (no custom bar);
-        // fall back to the bar card when promote is unavailable.
+        // 2) Pill OFF + tray ON → custom RemoteViews thin multi-color bar.
+        //    Best-looking shade bar; does not promote to AOD / clock chip.
+        if (wantPill && Build.VERSION.SDK_INT >= 36) {
+            buildPromotedNotification(state, includeTray = wantTray)?.let { return it }
+        }
         if (wantTray) {
             return buildLegacyNotification(state)
         }
-        if (wantPill && Build.VERSION.SDK_INT >= 36) {
-            buildPromotedNotification(state, includeTray = false)?.let { return it }
-        }
+        // Pill on older OS (no Live Update) — still show a useful card
         return buildLegacyNotification(state)
     }
 
@@ -417,13 +418,12 @@ class UsageMonitorService : Service() {
                 .setShowWhen(false)
                 .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
 
-            // ProgressStyle required for Live Update promotion (segmented color bar).
-            // Do NOT set customContentView — that demotes the status pill.
-            if (includeTray) {
-                tryApplyProgressStyle(builder, productsBar, usedVal, palette)
-            }
+            // ProgressStyle: multi-color when tray detail is on; solid used% bar
+            // otherwise. Helps Live Update stay eligible and gives shade a bar.
+            // Do NOT set customContentView — that demotes the status pill / AOD.
+            tryApplyProgressStyle(builder, if (includeTray) productsBar else emptyList(), usedVal, palette)
 
-            // Live Update / status chip APIs (API 36+)
+            // Live Update / status chip APIs (API 36+) — AOD + lock screen + clock
             val bCls = Notification.Builder::class.java
             bCls.getMethod("setRequestPromotedOngoing", Boolean::class.javaPrimitiveType)
                 .invoke(builder, true)

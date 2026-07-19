@@ -1,8 +1,8 @@
 {
-  "version": "1.0.1",
-  "tag": "v1.0.1",
+  "version": "1.0.2",
+  "tag": "v1.0.2",
   "zip": "GRLD-macOS-arm64.zip",
   "dmg": "GRLD-macOS-arm64.dmg",
   "zip_url": "https://github.com/blankspeaker/Grok-Rate-Limit-Display/raw/main/Binaries/GRLD-macOS-arm64.zip",
-  "notes": "Fixed notification/lockscreen widget"
+  "notes": "Always On/lock screen chip toggle; ProgressStyle bar when chip is on"
 }
