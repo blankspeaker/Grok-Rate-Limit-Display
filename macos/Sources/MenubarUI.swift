@@ -948,7 +948,11 @@ private final class DebugTapBarView: NSControl {
 }
 
 final class UsagePanelView: NSView {
-    private let panelWidth: CGFloat = 300
+    /// Must match [MenubarController.menuContentWidth] so the custom panel fills
+    /// the full menu (avoids left-heavy / “off-center” look when ⌘ shortcuts
+    /// and long titles widen the menu past a narrow fixed panel).
+    static let preferredWidth: CGFloat = 340
+    private var panelWidth: CGFloat { Self.preferredWidth }
     private let pad: CGFloat = 14
     weak var navTarget: AnyObject?
     var prevSelector: Selector?
@@ -1824,11 +1828,31 @@ final class MenubarController: NSObject, NSMenuDelegate {
         return item
     }
 
+    /// Indented settings row (no leading spaces — keeps menu width = panel width).
+    private func settingsItem(
+        _ title: String,
+        action: Selector?,
+        key: String = "",
+        enabled: Bool = true
+    ) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
+        item.target = action == nil ? nil : self
+        item.isEnabled = enabled
+        item.indentationLevel = 1
+        return item
+    }
+
     @objc private func noop() {}
+
+    /// Shared width for the usage panel + menu so content stays aligned.
+    private static let menuContentWidth = UsagePanelView.preferredWidth
 
     private func rebuildMenu() {
         let menu = NSMenu()
         menu.autoenablesItems = false
+        // Keep menu as wide as the usage panel so the chart/bar isn't a narrow
+        // left-aligned island next to the key-equivalent gutter.
+        menu.minimumWidth = Self.menuContentWidth
 
         if !GrokAuth.shared.isSignedIn {
             menu.addItem(infoItem("Not signed in"))
@@ -1903,122 +1927,58 @@ final class MenubarController: NSObject, NSMenuDelegate {
         menu.addItem(settingsHeader)
 
         if settingsExpanded {
-            // Account
+            // Account — use indentationLevel (not leading spaces) so titles
+            // don't force the menu wider than the usage panel.
             if GrokAuth.shared.isSignedIn {
-                let account = NSMenuItem(title: "    Signed in", action: nil, keyEquivalent: "")
-                account.isEnabled = false
-                menu.addItem(account)
-                let reauth = NSMenuItem(title: "    Sign In…", action: #selector(openSignIn), keyEquivalent: "")
-                reauth.target = self
-                menu.addItem(reauth)
-                let signOut = NSMenuItem(title: "    Sign Out", action: #selector(signOut), keyEquivalent: "")
-                signOut.target = self
-                menu.addItem(signOut)
+                menu.addItem(settingsItem("Signed in", action: nil, enabled: false))
+                menu.addItem(settingsItem("Sign In…", action: #selector(openSignIn)))
+                menu.addItem(settingsItem("Sign Out", action: #selector(signOut)))
             } else {
-                let signIn = NSMenuItem(title: "    Sign In to Grok…", action: #selector(openSignIn), keyEquivalent: "s")
-                signIn.target = self
-                menu.addItem(signIn)
+                menu.addItem(settingsItem("Sign In to Grok…", action: #selector(openSignIn), key: "s"))
             }
 
             menu.addItem(NSMenuItem.separator())
 
             // Display / launch
-            let toggleCats = NSMenuItem(
-                title: "    Show Categories in Menu Bar",
-                action: #selector(toggleCategories),
-                keyEquivalent: ""
-            )
-            toggleCats.target = self
+            let toggleCats = settingsItem("Show Categories in Menu Bar", action: #selector(toggleCategories))
             toggleCats.state = showCategories ? .on : .off
             menu.addItem(toggleCats)
 
-            let toggleBar = NSMenuItem(
-                title: "    Show Bar Graph in Menu Bar",
-                action: #selector(toggleBarInMenuBar),
-                keyEquivalent: ""
-            )
-            toggleBar.target = self
+            let toggleBar = settingsItem("Show Bar Graph in Menu Bar", action: #selector(toggleBarInMenuBar))
             toggleBar.state = showBarInMenuBar ? .on : .off
             menu.addItem(toggleBar)
 
-            let showUsed = NSMenuItem(
-                title: "    Show Used %",
-                action: #selector(selectShowUsedPercent),
-                keyEquivalent: ""
-            )
-            showUsed.target = self
+            let showUsed = settingsItem("Show Used %", action: #selector(selectShowUsedPercent))
             showUsed.state = showUsedPercent ? .on : .off
             menu.addItem(showUsed)
 
-            let showRemaining = NSMenuItem(
-                title: "    Show Remaining %",
-                action: #selector(selectShowRemainingPercent),
-                keyEquivalent: ""
-            )
-            showRemaining.target = self
+            let showRemaining = settingsItem("Show Remaining %", action: #selector(selectShowRemainingPercent))
             showRemaining.state = showUsedPercent ? .off : .on
             menu.addItem(showRemaining)
 
-            let launchLogin = NSMenuItem(
-                title: "    Open at Login",
-                action: #selector(toggleOpenAtLogin),
-                keyEquivalent: ""
-            )
-            launchLogin.target = self
+            let launchLogin = settingsItem("Open at Login", action: #selector(toggleOpenAtLogin))
             launchLogin.state = isOpenAtLoginEnabled ? .on : .off
             menu.addItem(launchLogin)
 
             menu.addItem(NSMenuItem.separator())
 
-            let exportHist = NSMenuItem(
-                title: "    Export History…",
-                action: #selector(exportHistory),
-                keyEquivalent: ""
-            )
-            exportHist.target = self
-            menu.addItem(exportHist)
-
-            let importHist = NSMenuItem(
-                title: "    Import History…",
-                action: #selector(importHistory),
-                keyEquivalent: ""
-            )
-            importHist.target = self
-            menu.addItem(importHist)
+            menu.addItem(settingsItem("Export History…", action: #selector(exportHistory)))
+            menu.addItem(settingsItem("Import History…", action: #selector(importHistory)))
 
             menu.addItem(NSMenuItem.separator())
 
             // Updates (checks Binaries/mac-latest.json on the monorepo)
-            let autoUp = NSMenuItem(
-                title: "    Auto-Update",
-                action: #selector(toggleAutoUpdate),
-                keyEquivalent: ""
-            )
-            autoUp.target = self
+            let autoUp = settingsItem("Auto-Update", action: #selector(toggleAutoUpdate))
             autoUp.state = autoUpdateEnabled ? .on : .off
             menu.addItem(autoUp)
 
             if let pending = pendingUpdate {
-                let install = NSMenuItem(
-                    title: "    Install Update \(pending.tag)…",
-                    action: #selector(installPendingUpdate),
-                    keyEquivalent: ""
-                )
-                install.target = self
-                menu.addItem(install)
+                menu.addItem(settingsItem("Install Update \(pending.tag)…", action: #selector(installPendingUpdate)))
             } else {
-                let check = NSMenuItem(
-                    title: "    Check for Updates…",
-                    action: #selector(checkForUpdatesManual),
-                    keyEquivalent: ""
-                )
-                check.target = self
-                menu.addItem(check)
+                menu.addItem(settingsItem("Check for Updates…", action: #selector(checkForUpdatesManual)))
             }
             if let updateStatus {
-                let st = NSMenuItem(title: "    \(updateStatus)", action: nil, keyEquivalent: "")
-                st.isEnabled = false
-                menu.addItem(st)
+                menu.addItem(settingsItem(updateStatus, action: nil, enabled: false))
             }
         }
 

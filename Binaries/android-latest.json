@@ -1,8 +1,8 @@
 {
-  "version": "1.0.2",
-  "versionCode": 3,
-  "tag": "v1.0.2",
+  "version": "1.0.3",
+  "versionCode": 4,
+  "tag": "v1.0.3",
   "apk": "GRLD-android.apk",
   "apk_url": "https://github.com/blankspeaker/Grok-Rate-Limit-Display/raw/main/Binaries/GRLD-android.apk",
-  "notes": "Always On/lock screen chip toggle; ProgressStyle bar when chip is on"
+  "notes": "Mac menu alignment: usage panel fills full menu width"
 }
