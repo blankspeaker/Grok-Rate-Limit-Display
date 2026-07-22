@@ -10,12 +10,12 @@ export default function App() {
 
   const handleSelect = useCallback((loc: Location) => {
     setSelectedId(loc.id);
-    setFocusLocation(loc);
+    setFocusLocation({ ...loc });
   }, []);
 
   return (
     <div className="app-shell">
-      <div className={`loading${ready ? " hidden" : ""}`}>
+      <div className={`loading${ready ? " hidden" : ""}`} aria-live="polite">
         <span className="loading-text">Loading orbit</span>
       </div>
 
@@ -27,14 +27,12 @@ export default function App() {
       />
 
       <div className="brand">
-        <div className="brand-mark">SpaceXAI demo</div>
+        <div className="brand-mark">Explorer</div>
         <div className="brand-title">ORBIT</div>
         <div className="brand-sub">3D Earth · featured cities</div>
       </div>
 
-      <div className="hint">
-        Drag to spin · Click a marker
-      </div>
+      <div className="hint">Drag to spin · Click a marker</div>
 
       <LocationsPanel selectedId={selectedId} onSelect={handleSelect} />
     </div>
