@@ -1,5 +1,4 @@
-import { useRef, useState, useMemo, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useState, useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { EARTH_RADIUS } from "../lib/geo";
 
@@ -7,6 +6,8 @@ const DAY_URL =
   "https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg";
 const BUMP_URL =
   "https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png";
+const CLOUDS_URL =
+  "https://unpkg.com/three-globe@2.31.1/example/img/earth-clouds.png";
 
 function FallbackEarth() {
   return (
@@ -44,6 +45,22 @@ function TexturedEarth({
   );
 }
 
+function Clouds({ map }: { map: THREE.Texture }) {
+  return (
+    <mesh scale={1.01}>
+      <sphereGeometry args={[EARTH_RADIUS, 48, 48]} />
+      <meshStandardMaterial
+        map={map}
+        transparent
+        opacity={0.28}
+        depthWrite={false}
+        roughness={1}
+        metalness={0}
+      />
+    </mesh>
+  );
+}
+
 function Atmosphere() {
   const mat = useMemo(
     () =>
@@ -51,10 +68,11 @@ function Atmosphere() {
         side: THREE.BackSide,
         transparent: true,
         depthWrite: false,
+        blending: THREE.AdditiveBlending,
         uniforms: {
           glowColor: { value: new THREE.Color("#38bdf8") },
-          coeficient: { value: 0.6 },
-          power: { value: 3.5 },
+          coeficient: { value: 0.55 },
+          power: { value: 3.2 },
         },
         vertexShader: `
           varying vec3 vNormal;
@@ -73,7 +91,7 @@ function Atmosphere() {
           varying vec3 vPositionNormal;
           void main() {
             float intensity = pow(coeficient - dot(vNormal, vPositionNormal), power);
-            gl_FragColor = vec4(glowColor, intensity * 0.55);
+            gl_FragColor = vec4(glowColor, clamp(intensity * 0.65, 0.0, 0.85));
           }
         `,
       }),
@@ -81,7 +99,7 @@ function Atmosphere() {
   );
 
   return (
-    <mesh scale={1.12}>
+    <mesh scale={1.14}>
       <sphereGeometry args={[EARTH_RADIUS, 48, 48]} />
       <primitive object={mat} attach="material" />
     </mesh>
@@ -91,6 +109,7 @@ function Atmosphere() {
 function useEarthTextures() {
   const [dayMap, setDayMap] = useState<THREE.Texture | null>(null);
   const [bumpMap, setBumpMap] = useState<THREE.Texture | null>(null);
+  const [cloudMap, setCloudMap] = useState<THREE.Texture | null>(null);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -99,15 +118,13 @@ function useEarthTextures() {
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin("anonymous");
 
-    Promise.all([
+    const load = (url: string) =>
       new Promise<THREE.Texture>((resolve, reject) => {
-        loader.load(DAY_URL, resolve, undefined, reject);
-      }),
-      new Promise<THREE.Texture>((resolve, reject) => {
-        loader.load(BUMP_URL, resolve, undefined, reject);
-      }),
-    ])
-      .then(([day, bump]) => {
+        loader.load(url, resolve, undefined, reject);
+      });
+
+    Promise.all([load(DAY_URL), load(BUMP_URL)])
+      .then(async ([day, bump]) => {
         if (cancelled) return;
         day.colorSpace = THREE.SRGBColorSpace;
         day.anisotropy = 8;
@@ -115,10 +132,18 @@ function useEarthTextures() {
         setDayMap(day);
         setBumpMap(bump);
         setLoading(false);
+        try {
+          const clouds = await load(CLOUDS_URL);
+          if (!cancelled) {
+            clouds.colorSpace = THREE.SRGBColorSpace;
+            setCloudMap(clouds);
+          }
+        } catch {
+          /* clouds optional */
+        }
       })
       .catch(() => {
         if (cancelled) return;
-        // Try day-only
         loader.load(
           DAY_URL,
           (day) => {
@@ -143,22 +168,15 @@ function useEarthTextures() {
     };
   }, []);
 
-  return { dayMap, bumpMap, failed, loading };
+  return { dayMap, bumpMap, cloudMap, failed, loading };
 }
 
-/** Primary globe export used by Scene */
+/** Earth is static in world space; OrbitControls rotates the camera. */
 export function GlobeSafe() {
-  const group = useRef<THREE.Group>(null);
-  const { dayMap, bumpMap, failed, loading } = useEarthTextures();
-
-  useFrame((_, delta) => {
-    if (group.current) {
-      group.current.rotation.y += delta * 0.015;
-    }
-  });
+  const { dayMap, bumpMap, cloudMap, failed, loading } = useEarthTextures();
 
   return (
-    <group ref={group}>
+    <group>
       {failed || (!loading && !dayMap) ? (
         <FallbackEarth />
       ) : dayMap ? (
@@ -166,6 +184,7 @@ export function GlobeSafe() {
       ) : (
         <FallbackEarth />
       )}
+      {cloudMap ? <Clouds map={cloudMap} /> : null}
       <Atmosphere />
     </group>
   );
