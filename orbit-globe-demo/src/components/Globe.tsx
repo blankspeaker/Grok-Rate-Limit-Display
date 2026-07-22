@@ -1,6 +1,5 @@
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { EARTH_RADIUS } from "../lib/geo";
 
@@ -10,79 +9,76 @@ const BUMP_URL =
   "https://unpkg.com/three-globe@2.31.1/example/img/earth-topology.png";
 
 function FallbackEarth() {
-  const mat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#1a6b8a"),
-        roughness: 0.85,
-        metalness: 0.05,
-        emissive: new THREE.Color("#0a2030"),
-        emissiveIntensity: 0.15,
-      }),
-    []
-  );
-
   return (
     <mesh>
       <sphereGeometry args={[EARTH_RADIUS, 64, 64]} />
-      <primitive object={mat} attach="material" />
+      <meshStandardMaterial
+        color="#1a6b8a"
+        roughness={0.85}
+        metalness={0.05}
+        emissive="#0a2030"
+        emissiveIntensity={0.18}
+      />
     </mesh>
   );
 }
 
-function TexturedEarth() {
-  const [dayMap, bumpMap] = useTexture([DAY_URL, BUMP_URL]);
-
-  dayMap.colorSpace = THREE.SRGBColorSpace;
-  dayMap.anisotropy = 8;
-
+function TexturedEarth({
+  dayMap,
+  bumpMap,
+}: {
+  dayMap: THREE.Texture;
+  bumpMap: THREE.Texture | null;
+}) {
   return (
     <mesh>
       <sphereGeometry args={[EARTH_RADIUS, 64, 64]} />
       <meshStandardMaterial
         map={dayMap}
-        bumpMap={bumpMap}
-        bumpScale={0.04}
-        roughness={0.9}
-        metalness={0.05}
+        bumpMap={bumpMap ?? undefined}
+        bumpScale={0.045}
+        roughness={0.88}
+        metalness={0.04}
       />
     </mesh>
   );
 }
 
 function Atmosphere() {
-  const mat = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      transparent: true,
-      depthWrite: false,
-      uniforms: {
-        glowColor: { value: new THREE.Color("#38bdf8") },
-        coeficient: { value: 0.6 },
-        power: { value: 3.5 },
-      },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vPositionNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vPositionNormal = normalize((modelViewMatrix * vec4(position, 1.0)).xyz);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 glowColor;
-        uniform float coeficient;
-        uniform float power;
-        varying vec3 vNormal;
-        varying vec3 vPositionNormal;
-        void main() {
-          float intensity = pow(coeficient - dot(vNormal, vPositionNormal), power);
-          gl_FragColor = vec4(glowColor, intensity * 0.55);
-        }
-      `,
-    });
-  }, []);
+  const mat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          glowColor: { value: new THREE.Color("#38bdf8") },
+          coeficient: { value: 0.6 },
+          power: { value: 3.5 },
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPositionNormal;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPositionNormal = normalize((modelViewMatrix * vec4(position, 1.0)).xyz);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 glowColor;
+          uniform float coeficient;
+          uniform float power;
+          varying vec3 vNormal;
+          varying vec3 vPositionNormal;
+          void main() {
+            float intensity = pow(coeficient - dot(vNormal, vPositionNormal), power);
+            gl_FragColor = vec4(glowColor, intensity * 0.55);
+          }
+        `,
+      }),
+    []
+  );
 
   return (
     <mesh scale={1.12}>
@@ -92,52 +88,68 @@ function Atmosphere() {
   );
 }
 
-export function Globe() {
-  const group = useRef<THREE.Group>(null);
-  const [textureFailed, setTextureFailed] = useState(false);
+function useEarthTextures() {
+  const [dayMap, setDayMap] = useState<THREE.Texture | null>(null);
+  const [bumpMap, setBumpMap] = useState<THREE.Texture | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useFrame((_, delta) => {
-    // subtle idle tilt wobble — primary spin is via OrbitControls autoRotate
-    if (group.current) {
-      group.current.rotation.y += delta * 0.02;
-    }
-  });
+  useEffect(() => {
+    let cancelled = false;
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin("anonymous");
 
-  return (
-    <group ref={group}>
-      {textureFailed ? (
-        <FallbackEarth />
-      ) : (
-        <TextureErrorBoundary onError={() => setTextureFailed(true)}>
-          <TexturedEarth />
-        </TextureErrorBoundary>
-      )}
-      <Atmosphere />
-    </group>
-  );
+    Promise.all([
+      new Promise<THREE.Texture>((resolve, reject) => {
+        loader.load(DAY_URL, resolve, undefined, reject);
+      }),
+      new Promise<THREE.Texture>((resolve, reject) => {
+        loader.load(BUMP_URL, resolve, undefined, reject);
+      }),
+    ])
+      .then(([day, bump]) => {
+        if (cancelled) return;
+        day.colorSpace = THREE.SRGBColorSpace;
+        day.anisotropy = 8;
+        bump.anisotropy = 4;
+        setDayMap(day);
+        setBumpMap(bump);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Try day-only
+        loader.load(
+          DAY_URL,
+          (day) => {
+            if (cancelled) return;
+            day.colorSpace = THREE.SRGBColorSpace;
+            day.anisotropy = 8;
+            setDayMap(day);
+            setLoading(false);
+          },
+          undefined,
+          () => {
+            if (!cancelled) {
+              setFailed(true);
+              setLoading(false);
+            }
+          }
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { dayMap, bumpMap, failed, loading };
 }
 
-/** Catch texture load failures and fall back to procedural material */
-function TextureErrorBoundary({
-  children,
-  onError,
-}: {
-  children: React.ReactNode;
-  onError: () => void;
-}) {
-  try {
-    return <>{children}</>;
-  } catch {
-    onError();
-    return null;
-  }
-}
-
-// useTexture throws promise / suspends — wrap with Suspense in parent.
-// Also export a safe variant that uses onError via drei's texture loader pattern.
+/** Primary globe export used by Scene */
 export function GlobeSafe() {
   const group = useRef<THREE.Group>(null);
-  const [useFallback, setUseFallback] = useState(false);
+  const { dayMap, bumpMap, failed, loading } = useEarthTextures();
 
   useFrame((_, delta) => {
     if (group.current) {
@@ -147,43 +159,16 @@ export function GlobeSafe() {
 
   return (
     <group ref={group}>
-      {useFallback ? (
+      {failed || (!loading && !dayMap) ? (
         <FallbackEarth />
+      ) : dayMap ? (
+        <TexturedEarth dayMap={dayMap} bumpMap={bumpMap} />
       ) : (
-        <EarthWithTextures onFail={() => setUseFallback(true)} />
+        <FallbackEarth />
       )}
       <Atmosphere />
     </group>
   );
 }
 
-function EarthWithTextures({ onFail }: { onFail: () => void }) {
-  // Preload-safe: drei useTexture will suspend; parent Suspense catches.
-  // If CORS fails at runtime, canvas may error — listener below handles it.
-  const maps = useTexture(
-    [DAY_URL, BUMP_URL],
-    undefined,
-    () => onFail()
-  ) as THREE.Texture[];
-
-  const dayMap = maps[0];
-  const bumpMap = maps[1];
-
-  if (dayMap) {
-    dayMap.colorSpace = THREE.SRGBColorSpace;
-    dayMap.anisotropy = 8;
-  }
-
-  return (
-    <mesh>
-      <sphereGeometry args={[EARTH_RADIUS, 64, 64]} />
-      <meshStandardMaterial
-        map={dayMap}
-        bumpMap={bumpMap}
-        bumpScale={0.045}
-        roughness={0.88}
-        metalness={0.04}
-      />
-    </mesh>
-  );
-}
+export { GlobeSafe as Globe };
