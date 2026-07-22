@@ -2,11 +2,17 @@ import { Suspense, useRef, useEffect, useCallback } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { GlobeSafe } from "./Globe";
 import { Markers } from "./Markers";
 import type { Location } from "../data/locations";
 import { latLngToVector3, EARTH_RADIUS } from "../lib/geo";
+
+/** Minimal OrbitControls surface we use */
+type ControlsHandle = {
+  autoRotate: boolean;
+  target: THREE.Vector3;
+  update: () => void;
+};
 
 interface SceneProps {
   selectedId: string | null;
@@ -21,7 +27,7 @@ function ControlsManager({
 }: {
   focusLocation: Location | null;
 }) {
-  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const controlsRef = useRef<ControlsHandle | null>(null);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animating = useRef(false);
   const targetPos = useRef(new THREE.Vector3());
@@ -44,7 +50,6 @@ function ControlsManager({
     }, 2000);
   }, []);
 
-  // Smooth focus animation when location changes
   useEffect(() => {
     if (!focusLocation || !controlsRef.current) return;
 
@@ -55,11 +60,9 @@ function ControlsManager({
     );
     targetPos.current.copy(surface);
 
-    // Camera: offset outward along city normal, slightly elevated
     const dir = surface.clone().normalize();
     const camDist = 4.2;
     targetCam.current.copy(dir.multiplyScalar(camDist));
-    // slight offset so we don't look dead-on
     targetCam.current.y += 0.35;
 
     animating.current = true;
@@ -74,13 +77,11 @@ function ControlsManager({
     const c = controlsRef.current;
     if (!c || !animating.current) return;
 
-    // Lerp camera position and orbit target
     camera.position.lerp(targetCam.current, 0.045);
     c.target.lerp(targetPos.current, 0.055);
     c.update();
 
-    const camDone =
-      camera.position.distanceTo(targetCam.current) < 0.04;
+    const camDone = camera.position.distanceTo(targetCam.current) < 0.04;
     const targetDone = c.target.distanceTo(targetPos.current) < 0.02;
 
     if (camDone && targetDone) {
@@ -91,7 +92,7 @@ function ControlsManager({
 
   return (
     <OrbitControls
-      ref={controlsRef}
+      ref={controlsRef as React.RefObject<never>}
       enableDamping
       dampingFactor={0.08}
       autoRotate
@@ -127,16 +128,13 @@ function Lights() {
         intensity={0.25}
         color="#6090c0"
       />
-      <hemisphereLight
-        args={["#b0c8e8", "#0a1520", 0.35]}
-      />
+      <hemisphereLight args={["#b0c8e8", "#0a1520", 0.35]} />
     </>
   );
 }
 
 function ReadySignal({ onReady }: { onReady: () => void }) {
   useEffect(() => {
-    // Small delay so first frame paints
     const t = setTimeout(onReady, 400);
     return () => clearTimeout(t);
   }, [onReady]);
