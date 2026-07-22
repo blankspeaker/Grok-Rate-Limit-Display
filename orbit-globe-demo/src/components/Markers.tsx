@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { LOCATIONS, type Location } from "../data/locations";
@@ -18,28 +18,26 @@ function Marker({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const group = useRef<THREE.Group>(null);
   const glow = useRef<THREE.Mesh>(null);
-  const pos = latLngToVector3(location.lat, location.lng, EARTH_RADIUS + 0.02);
+  const pos = useMemo(
+    () => latLngToVector3(location.lat, location.lng, EARTH_RADIUS + 0.02),
+    [location.lat, location.lng]
+  );
+  const phase = useMemo(() => location.lat * 0.1 + location.lng * 0.05, [location]);
 
   useFrame(({ clock }) => {
-    if (glow.current) {
-      const t = clock.getElapsedTime();
-      const pulse = 1 + Math.sin(t * 2.4 + location.lat) * 0.35;
-      glow.current.scale.setScalar(selected ? pulse * 1.4 : pulse);
-      const mat = glow.current.material as THREE.MeshBasicMaterial;
-      mat.opacity = selected
-        ? 0.35 + Math.sin(t * 2.4) * 0.15
-        : 0.18 + Math.sin(t * 2.4 + location.lat) * 0.08;
-    }
+    if (!glow.current) return;
+    const t = clock.getElapsedTime();
+    const pulse = 1 + Math.sin(t * 2.4 + phase) * 0.35;
+    glow.current.scale.setScalar(selected ? pulse * 1.45 : pulse);
+    const mat = glow.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = selected
+      ? 0.38 + Math.sin(t * 2.4) * 0.15
+      : 0.18 + Math.sin(t * 2.4 + phase) * 0.08;
   });
-
-  // Orient marker to face outward from globe center
-  const up = pos.clone().normalize();
 
   return (
     <group
-      ref={group}
       position={pos}
       onClick={(e) => {
         e.stopPropagation();
@@ -54,12 +52,13 @@ function Marker({
     >
       {/* Soft pulse glow */}
       <mesh ref={glow} scale={1.2}>
-        <sphereGeometry args={[0.06, 16, 16]} />
+        <sphereGeometry args={[0.055, 16, 16]} />
         <meshBasicMaterial
           color="#38bdf8"
           transparent
           opacity={0.25}
           depthWrite={false}
+          toneMapped={false}
         />
       </mesh>
 
@@ -69,25 +68,13 @@ function Marker({
         <meshStandardMaterial
           color={selected ? "#7dd3fc" : "#38bdf8"}
           emissive="#38bdf8"
-          emissiveIntensity={selected ? 2.2 : 1.2}
+          emissiveIntensity={selected ? 2.4 : 1.3}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Small stem pointing outward */}
-      <mesh position={up.clone().multiplyScalar(0.035)}>
-        <cylinderGeometry args={[0.004, 0.006, 0.05, 8]} />
-        <meshStandardMaterial
-          color="#38bdf8"
-          emissive="#0ea5e9"
-          emissiveIntensity={0.8}
-          toneMapped={false}
-        />
-      </mesh>
-
-      {/* Point light for selected */}
       {selected && (
-        <pointLight color="#38bdf8" intensity={0.6} distance={1.5} decay={2} />
+        <pointLight color="#38bdf8" intensity={0.55} distance={1.4} decay={2} />
       )}
     </group>
   );
