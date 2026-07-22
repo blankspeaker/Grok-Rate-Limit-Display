@@ -1,8 +1,8 @@
 {
-  "version": "1.0.4",
-  "versionCode": 6,
-  "tag": "v1.0.4",
+  "version": "1.0.5",
+  "versionCode": 7,
+  "tag": "v1.0.5",
   "apk": "GRLD-android.apk",
   "apk_url": "https://github.com/blankspeaker/Grok-Rate-Limit-Display/raw/main/Binaries/GRLD-android.apk",
-  "notes": "Map GrokAppBuilder to App Builder (was mislabeled Grok Build)"
+  "notes": "Android: restart monitor after boot/update (blank days without samples)"
 }

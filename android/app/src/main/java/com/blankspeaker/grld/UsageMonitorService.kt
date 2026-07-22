@@ -766,10 +766,13 @@ class UsageMonitorService : Service() {
         private const val POLL_IDLE_MS = 30 * 60 * 1000L
 
         fun start(context: Context) {
+            val app = context.applicationContext
             try {
-                context.startForegroundService(Intent(context, UsageMonitorService::class.java))
-            } catch (_: Exception) {
-                // Screen-off / background start restrictions (Android 12+) — retry from UI later.
+                app.startForegroundService(Intent(app, UsageMonitorService::class.java))
+            } catch (e: Exception) {
+                // Android 12+ can reject FGS start briefly after boot — schedule retries.
+                android.util.Log.w("GRLD-Monitor", "startForegroundService failed", e)
+                BootReceiver.scheduleRetry(app, delayMs = 45_000L)
             }
         }
 
