@@ -1,8 +1,8 @@
 {
-  "version": "1.0.3",
-  "versionCode": 4,
-  "tag": "v1.0.3",
+  "version": "1.0.4",
+  "versionCode": 6,
+  "tag": "v1.0.4",
   "apk": "GRLD-android.apk",
   "apk_url": "https://github.com/blankspeaker/Grok-Rate-Limit-Display/raw/main/Binaries/GRLD-android.apk",
-  "notes": "Mac menu alignment: usage panel fills full menu width"
+  "notes": "Map GrokAppBuilder to App Builder (was mislabeled Grok Build)"
 }

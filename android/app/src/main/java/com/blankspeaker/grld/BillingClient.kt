@@ -147,17 +147,30 @@ object BillingClient {
             .replace("_", "")
             .replace("-", "")
             .replace(" ", "")
-        return when {
-            s.contains("build") -> ProductColors.BUILD.id
-            s.contains("chat") -> ProductColors.CHAT.id
-            s.contains("imagine") || s.contains("image") -> ProductColors.IMAGINE.id
-            s.contains("plugin") -> ProductColors.PLUGINS.id
-            s.contains("voice") -> ProductColors.VOICE.id
-            s.contains("api") -> ProductColors.API.id
-            s.contains("third") || s.contains("3rd") -> ProductColors.THIRD_PARTY.id
-            else -> {
-                // Stable pseudo-id for unknowns so palette still works
-                100 + (s.hashCode() and 0xFF)
+        // Exact known API names first (avoids substring traps like "appbuilder" ⊃ "build").
+        return when (s) {
+            "grokbuild", "build" -> ProductColors.BUILD.id
+            "grokappbuilder", "appbuilder" -> ProductColors.APP_BUILDER.id
+            "grokchat", "chat" -> ProductColors.CHAT.id
+            "grokimagine", "imagine", "image", "images" -> ProductColors.IMAGINE.id
+            "grokplugins", "plugins", "plugin" -> ProductColors.PLUGINS.id
+            "voice", "grokvoice" -> ProductColors.VOICE.id
+            "api", "grokapi" -> ProductColors.API.id
+            "thirdparty", "3rdparty", "third" -> ProductColors.THIRD_PARTY.id
+            else -> when {
+                s.contains("appbuilder") -> ProductColors.APP_BUILDER.id
+                s.contains("third") || s.contains("3rd") -> ProductColors.THIRD_PARTY.id
+                s.contains("plugin") -> ProductColors.PLUGINS.id
+                s.contains("imagine") || s.contains("image") -> ProductColors.IMAGINE.id
+                s.contains("voice") -> ProductColors.VOICE.id
+                s.contains("chat") -> ProductColors.CHAT.id
+                s.contains("api") -> ProductColors.API.id
+                // "build" but not "builder" (GrokAppBuilder must not map to Grok Build).
+                s.contains("build") && !s.contains("builder") -> ProductColors.BUILD.id
+                else -> {
+                    // Stable pseudo-id for unknowns so palette still works
+                    100 + (s.hashCode() and 0xFF)
+                }
             }
         }
     }

@@ -882,6 +882,7 @@ enum ProductColors {
         case 4: return NSColor(srgbRed: 0.02, green: 0.71, blue: 0.83, alpha: 1)
         case 5: return NSColor(srgbRed: 0.66, green: 0.33, blue: 0.97, alpha: 1)
         case 6: return NSColor(srgbRed: 0.93, green: 0.28, blue: 0.60, alpha: 1)
+        case 7: return NSColor(srgbRed: 0.55, green: 0.55, blue: 0.58, alpha: 1) // App Builder
         default: return NSColor(srgbRed: 0.42, green: 0.45, blue: 0.50, alpha: 1)
         }
     }
@@ -895,6 +896,7 @@ enum ProductColors {
         case 4: return "Chat"
         case 5: return "Imagine"
         case 6: return "Voice"
+        case 7: return "App Builder"
         default: return "Other"
         }
     }
@@ -1751,6 +1753,7 @@ final class MenubarController: NSObject, NSMenuDelegate {
         case "Grok Build": return "Build"
         case "Grok Plugins": return "Plugins"
         case "3rd Party": return "3P"
+        case "App Builder": return "AppB"
         default: return name
         }
     }

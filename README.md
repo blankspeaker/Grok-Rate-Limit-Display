@@ -1,6 +1,6 @@
 # Grok Rate Limit Display (GRLD)
 
-**Version 1.0.3** — macOS menu bar + Android status notification for your **weekly SuperGrok usage**.
+**Version 1.0.4** — macOS menu bar + Android status notification for your **weekly SuperGrok usage**.
 
 By [@blankspeaker](https://x.com/blankspeaker).
 

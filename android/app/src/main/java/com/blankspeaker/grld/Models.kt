@@ -31,7 +31,9 @@ enum class ProductColors(val id: Int, val argb: Long) {
     PLUGINS(3, 0xFFAB47BCL),
     CHAT(4, 0xFF26C6DAL),
     IMAGINE(5, 0xFFFFCA28L),
-    VOICE(6, 0xFFEF5350L);
+    VOICE(6, 0xFFEF5350L),
+    /** GrokAppBuilder (API product id 7). */
+    APP_BUILDER(7, 0xFF8D8D93L);
 
     companion object {
         /** Max categories we can show in the notification body (2 rows × 4). */
@@ -59,6 +61,7 @@ enum class ProductColors(val id: Int, val argb: Long) {
             4 -> "Chat"
             5 -> "Imagine"
             6 -> "Voice"
+            7 -> "App Builder"
             else -> "Other ($id)"
         }
     }

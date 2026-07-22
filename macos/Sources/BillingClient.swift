@@ -113,13 +113,28 @@ enum BillingClient {
             .replacingOccurrences(of: "_", with: "")
             .replacingOccurrences(of: "-", with: "")
             .replacingOccurrences(of: " ", with: "")
-        if s.contains("build") { return 2 }
-        if s.contains("chat") { return 4 }
-        if s.contains("imagine") || s.contains("image") { return 5 }
-        if s.contains("plugin") { return 3 }
-        if s.contains("voice") { return 6 }
-        if s.contains("api") { return 1 }
+        // Exact known API names first (avoids substring traps like "appbuilder" ⊃ "build").
+        switch s {
+        case "grokbuild", "build": return 2
+        case "grokappbuilder", "appbuilder": return 7
+        case "grokchat", "chat": return 4
+        case "grokimagine", "imagine", "image", "images": return 5
+        case "grokplugins", "plugins", "plugin": return 3
+        case "voice", "grokvoice": return 6
+        case "api", "grokapi": return 1
+        case "thirdparty", "3rdparty", "third": return 0
+        default: break
+        }
+        // Fallback contains matching — order matters.
+        if s.contains("appbuilder") { return 7 }
         if s.contains("third") || s.contains("3rd") { return 0 }
+        if s.contains("plugin") { return 3 }
+        if s.contains("imagine") || s.contains("image") { return 5 }
+        if s.contains("voice") { return 6 }
+        if s.contains("chat") { return 4 }
+        if s.contains("api") { return 1 }
+        // "build" but not "builder" (GrokAppBuilder must not map to Grok Build).
+        if s.contains("build") && !s.contains("builder") { return 2 }
         return 100 + abs(s.hashValue % 200)
     }
 
@@ -132,6 +147,7 @@ enum BillingClient {
         case 4: return "Chat"
         case 5: return "Imagine"
         case 6: return "Voice"
+        case 7: return "App Builder"
         default:
             // "GrokBuild" → "Grok Build"
             var out = ""
